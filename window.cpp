@@ -17,7 +17,7 @@ Window::Window()
     QHBoxLayout *hb1=new QHBoxLayout();
     //sb_n=new QSpinBox();
 
-
+    saving=false;
     glw=new GLWidget(this);
     QVBoxLayout *vb=new QVBoxLayout();
     ovs.resize(5);
@@ -77,7 +77,18 @@ void Window::recalculate()
             maxl=ovs[i]->l->value();
     if(maxl<4)
         maxl=4;
-    sc->setResolution(maxl*10,maxl*10);
+    int maxm=0;
+    for(int i=0;i<ovs.size();i++)
+        if(ovs[i]->m->value()>maxl)
+            maxm=ovs[i]->m->value();
+    if(maxm<4)
+        maxm=4;
+
+    if(!saving)
+        sc->setResolution(maxl*10,maxm*10);
+    else
+        sc->setResolution(maxl*25,maxm*25);
+    saving=false;
 
     sc->update();
 
@@ -105,7 +116,9 @@ void Window::recalculate()
 
 void Window::exportFile()
 {
-    QString filename=QFileDialog::getSaveFileName(this, "Save file", "", ".stl");
+    QString filename=QFileDialog::getSaveFileName(this, "Save file", "*.stl", "*.stl");
+    saving=true;
+    recalculate();
     sc->saveFile(filename.toStdString().c_str());
 
 }

@@ -252,6 +252,37 @@ void SphericalCalculator::createFaces()
 
 void SphericalCalculator::saveFile(std::string  filename)
 {
+  cerr<<"exporting bin"<<endl;
+  char header[80]="foobar";
+  uint32_t triangles=faces.size()*3;
+
+  fstream out(filename.c_str(),fstream::out|fstream::binary);
+  out.write(header,80);
+  out.write((char*)&triangles,sizeof(uint32_t));
+
+  for(int i=0;i<(int)faces.size();i++)
+  {
+      float data[3*4];
+      data[0]=0;data[1]=0;data[2]=0; //n
+      data[3]=faces[i].x[0][0];
+      data[4]=faces[i].x[0][1];
+      data[5]=faces[i].x[0][2];
+      data[6]=faces[i].x[1][0];
+      data[7]=faces[i].x[1][1];
+      data[8]=faces[i].x[1][2];
+      data[9]=faces[i].x[2][0];
+      data[10]=faces[i].x[2][1];
+      data[11]=faces[i].x[2][2];
+      out.write((char*)&data[0],sizeof(data));
+      uint16_t d=0;
+      out.write((char*)&d,sizeof(d));
+
+  }
+  out.close();
+}
+/*
+void SphericalCalculator::saveFile(std::string  filename)
+{
   cerr<<"exporting"<<endl;
 
   fstream out(filename.c_str(),fstream::out);
@@ -277,6 +308,7 @@ void SphericalCalculator::saveFile(std::string  filename)
   out.close();
 }
 
+*/
 void SphericalCalculator::update()
 {
     calculate();

@@ -4,7 +4,7 @@
 #include <QtOpenGL/QGLWidget>
 #include <QMatrix4x4>
 
-class QtLogo;
+//class QtLogo;
 class Patch;
 class Geometry;
 
@@ -40,7 +40,7 @@ protected:
     //void keyPressEvent(QKeyEvent *event);
 
 private:
-    QtLogo *logo;
+    //QtLogo *logo;
     int xRot;
     int yRot;
     int zRot;

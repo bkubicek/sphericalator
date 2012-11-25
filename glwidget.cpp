@@ -4,7 +4,7 @@
  #include <math.h>
 
  #include "glwidget.h"
- #include "qtlogo.h"
+ //#include "qtlogo.h"
 #include "patch.h"
 
 
@@ -15,7 +15,7 @@
  GLWidget::GLWidget(QWidget *parent)
      : QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
  {
-     logo = 0;
+     //logo = 0;
      xRot = 0;
      yRot = 0;
      zRot = 0;
@@ -83,8 +83,8 @@
  {
      qglClearColor(qtPurple.dark());
 
-     logo = new QtLogo(this, 64);
-     logo->setColor(qtGreen.dark());
+     //logo = new QtLogo(this, 64);
+     //logo->setColor(qtGreen.dark());
 
      glEnable(GL_DEPTH_TEST);
      glEnable(GL_CULL_FACE);

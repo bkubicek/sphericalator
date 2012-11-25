@@ -51,6 +51,7 @@ private:
    QSpinBox *sb_n;
    std::vector<OverlayGUI*> ovs;
    QPushButton *pb_export;
+   bool saving;
 public slots:
    void recalculate();
    void recalculate(int i);
