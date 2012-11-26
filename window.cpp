@@ -93,7 +93,9 @@ void Window::recalculate()
     sc->update();
 
     glw->glp->clear();
-    //std::cout<<"Faces:"<<sc->faces.size()<<std::endl;
+    glw->glp_overhang->clear();
+    std::cout<<"Faces:"<<sc->faces.size()<<std::endl;
+    std::cout<<"Faces overhnags:"<<sc->overhangs.size()<<std::endl;
     for(int i=0;i<(int)sc->faces.size();i++)
     {
         Face &f=sc->faces[i];
@@ -101,16 +103,32 @@ void Window::recalculate()
         QVector3D b(f.x[1][0],f.x[1][1],f.x[1][2]);
         QVector3D c(f.x[2][0],f.x[2][1],f.x[2][2]);
 
-        QVector3D n;
-        n=QVector3D::crossProduct(b-a,c-a);
-        float r=0.2;
-        glw->glp->addTri(r*a,r*b,r*c,-r*n);
-    }
+        QVector3D n(f.n[0],f.n[1],f.n[2]);
+        
+	float r=0.2;
+	glw->glp->addTri(r*a,r*b,r*c,r*n);
+	
 
-    //glw->glp->addTri(QVector3D(0,0,0),QVector3D(2,2,2),QVector3D(5,5,2),QVector3D(-1,0,0));
+    }
+    for(int i=0;i<(int)sc->overhangs.size();i++)
+    {
+      
+        Face &f=sc->overhangs[i];
+        QVector3D a(f.x[0][0],f.x[0][1],f.x[0][2]);
+        QVector3D b(f.x[1][0],f.x[1][1],f.x[1][2]);
+        QVector3D c(f.x[2][0],f.x[2][1],f.x[2][2]);
+
+        QVector3D n(f.n[0],f.n[1],f.n[2]);;        
+	float r=0.2;
+	glw->glp_overhang->addTri(r*a,r*b,r*c,r*n);
+      
+    }
+    
     glw->glp->setSmoothing(Patch::Smooth);
+    glw->glp_overhang->setSmoothing(Patch::Smooth);
 
     glw->g->finalize();
+    glw->g_overhang->finalize();
     glw->updateGL();
 }
 

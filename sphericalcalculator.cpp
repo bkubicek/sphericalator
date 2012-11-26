@@ -5,11 +5,13 @@
 #include <math.h>
 #include <vector>
 #include <stdint.h>
+#include <QVector3D>
 
 
 SphericalCalculator::SphericalCalculator()
 {
     setResolution(130,130);
+    overhangstart=0.9;
 
 
      //prepare factorial and nlm
@@ -229,12 +231,60 @@ void SphericalCalculator::addFace(const Point &a,const Point &b,const Point &c)
     f.x[2][1]=c.x[1];
     f.x[2][2]=c.x[2];
 
-    faces.push_back(f);
+    QVector3D aa(f.x[0][0],f.x[0][1],f.x[0][2]);
+    QVector3D bb(f.x[1][0],f.x[1][1],f.x[1][2]);
+    QVector3D cc(f.x[2][0],f.x[2][1],f.x[2][2]);
+
+    QVector3D nv;
+    nv=-QVector3D::crossProduct(bb-aa,cc-aa);
+    nv.normalize();
+    f.n[0]=nv.x();
+    f.n[1]=nv.y();
+    f.n[2]=nv.z();
+    if(f.n[2]<overhangstart)
+      faces.push_back(f);
+    else
+      overhangs.push_back(f);
+    
+    if(a.x[2]<minz) minz=a.x[2];
+    if(b.x[2]<minz) minz=b.x[2];
+    if(c.x[2]<minz) minz=c.x[2];
+}
+
+void SphericalCalculator::addFace(std::vector<Face> &faces,const Point &a,const Point &b,const Point &c)
+{
+    Face f;
+    f.x[0][0]=a.x[0];
+    f.x[0][1]=a.x[1];
+    f.x[0][2]=a.x[2];
+
+    f.x[1][0]=b.x[0];
+    f.x[1][1]=b.x[1];
+    f.x[1][2]=b.x[2];
+
+    f.x[2][0]=c.x[0];
+    f.x[2][1]=c.x[1];
+    f.x[2][2]=c.x[2];
+
+    QVector3D aa(f.x[0][0],f.x[0][1],f.x[0][2]);
+    QVector3D bb(f.x[1][0],f.x[1][1],f.x[1][2]);
+    QVector3D cc(f.x[2][0],f.x[2][1],f.x[2][2]);
+
+    QVector3D nv;
+    nv=-QVector3D::crossProduct(bb-aa,cc-aa);
+    nv.normalize();
+    f.n[0]=nv.x();
+    f.n[1]=nv.y();
+    f.n[2]=nv.z();
+    
+     faces.push_back(f);
+    
 }
 
 void SphericalCalculator::createFaces()
 {
     faces.clear();
+    overhangs.clear();
     for(int l=0;l<numLayers-1;l++)
     {
       for(int i=0;i<numAngles-1;i++)
@@ -261,19 +311,23 @@ void SphericalCalculator::saveFile(std::string  filename)
   out.write(header,80);
   out.write((char*)&triangles,sizeof(uint32_t));
 
-  for(int i=0;i<(int)faces.size();i++)
+  vector<Face> all;
+  all.insert(all.end(),faces.begin(),faces.end());
+  all.insert(all.end(),overhangs.begin(),overhangs.end());
+  
+  for(int i=0;i<(int)all.size();i++)
   {
       float data[3*4];
       data[0]=0;data[1]=0;data[2]=0; //n
-      data[3]=faces[i].x[0][0];
-      data[4]=faces[i].x[0][1];
-      data[5]=faces[i].x[0][2];
-      data[6]=faces[i].x[1][0];
-      data[7]=faces[i].x[1][1];
-      data[8]=faces[i].x[1][2];
-      data[9]=faces[i].x[2][0];
-      data[10]=faces[i].x[2][1];
-      data[11]=faces[i].x[2][2];
+      data[3]=all[i].x[0][0];
+      data[4]=all[i].x[0][1];
+      data[5]=all[i].x[0][2];
+      data[6]=all[i].x[1][0];
+      data[7]=all[i].x[1][1];
+      data[8]=all[i].x[1][2];
+      data[9]=all[i].x[2][0];
+      data[10]=all[i].x[2][1];
+      data[11]=all[i].x[2][2];
       out.write((char*)&data[0],sizeof(data));
       uint16_t d=0;
       out.write((char*)&d,sizeof(d));
@@ -310,8 +364,124 @@ void SphericalCalculator::saveFile(std::string  filename)
 }
 
 */
+
+bool equals(const Point &a,const Point &b)
+{
+  if( (a.x[0]==b.x[0]) && (a.x[1]==b.x[1]) && (a.x[2]==b.x[2]) )
+    return true;
+  return false;
+}
+
+void SphericalCalculator::addEdge(const Point &a,const Point &b)
+{
+  
+  for(int i=0;i<edges.size();i++)
+  {
+    Edge &edge=edges[i];
+    if( (equals(a,edge.p[0]) && equals(b,edge.p[1])) ||
+        (equals(b,edge.p[0]) && equals(a,edge.p[1]))
+        )
+    {
+      count[i]++;
+      return;
+    }
+  }
+    
+   Edge e;
+  e.p[0]=a;
+  e.p[1]=b;
+  edges.push_back(e);
+  count.push_back(1);
+}
+
 void SphericalCalculator::update()
 {
     calculate();
+    minz=0;
     createFaces();
+    if(0)
+    for(int i=0;i<overhangs.size();i++)
+    {
+      faces.push_back(overhangs[i]);
+      faces.back().x[0][2]=minz;
+      faces.back().x[1][2]=minz;
+      faces.back().x[2][2]=minz;
+      
+    }
+    
+    
+    for(int t=0;t<overhangs.size();t++)
+    {
+      Face &f=overhangs[t];
+      Point a,b,c;
+      a.x[0]=f.x[0][0];
+      a.x[1]=f.x[0][1];
+      a.x[2]=f.x[0][2];
+      
+      b.x[0]=f.x[1][0];
+      b.x[1]=f.x[1][1];
+      b.x[2]=f.x[1][2];
+      
+      c.x[0]=f.x[2][0];
+      c.x[1]=f.x[2][1];
+      c.x[2]=f.x[2][2];
+      addEdge(a,b);
+      addEdge(b,c);
+      addEdge(c,a);
+    }
+    
+    float low=minz-0.01;
+    cout<<"low: "<<low<<" minz:"<<minz<<endl;
+    
+    vector<Face> supstruct;
+    for(int i=0;i<edges.size();i++)
+      if(count[i]==1)
+    {
+      
+      Point h1=edges[i].p[0];
+      Point h2=edges[i].p[1];
+      Point l1=edges[i].p[0];
+      Point l2=edges[i].p[1];
+      l1.x[2]=low;
+      l2.x[2]=low;
+      h1.x[2]-=0.01;
+      h2.x[2]-=0.01;
+      
+      
+     addFace(supstruct,h1,h2,l1);
+     addFace(supstruct,h2,l2,l1);
+  
+    }
+    
+    edges.clear();
+    count.clear();
+    
+    for(int i=0;i<overhangs.size();i++)
+    {
+      Face g=overhangs[i];
+      
+      g.x[0][2]=low;
+      g.x[1][2]=low;
+      g.x[2][2]=low;
+      supstruct.push_back(g);
+      
+      Face f=overhangs[i];
+      f.x[0][2]-=0.01;
+      f.x[1][2]-=0.01;
+      f.x[2][2]-=0.01;
+      float xx[3]={f.x[0][0],f.x[0][1],f.x[0][2]};
+      f.x[0][0]=f.x[1][0];
+      f.x[0][1]=f.x[1][1];
+      f.x[0][2]=f.x[1][2];
+      f.x[1][0]=xx[0];
+      f.x[1][1]=xx[1];
+      f.x[1][2]=xx[2];
+      supstruct.push_back(f);
+      
+      
+    }
+     overhangs.insert(overhangs.end(),supstruct.begin(),supstruct.end());
+
+    
 }
+

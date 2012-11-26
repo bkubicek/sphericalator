@@ -19,7 +19,8 @@ public:
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
     Patch *glp;
-    Geometry *g;
+    Patch *glp_overhang;
+    Geometry *g,*g_overhang;
 
 public slots:
     void setXRotation(int angle);

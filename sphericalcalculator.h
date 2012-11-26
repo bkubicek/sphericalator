@@ -21,6 +21,12 @@ struct Point
 struct Face
 {
     float x[3][3];
+    float n[3];
+};
+
+struct Edge
+{
+  Point p[2];
 };
 
 const Point zero={{0,0,0}};
@@ -37,16 +43,23 @@ public:
     SphericalCalculator();
     void setResolution(int _numLayers, int _numAngles);
     void update();
+    float overhangstart;
 
     void saveFile(std::string filename);
 
     int numAngles;
     int numLayers;
+    float minz;
 
     std::vector< std::vector<Point> > pts; //point array
 
     std::vector<Face> faces;
+    std::vector<Face> overhangs;
     std::vector<Overlay> overlays;
+    
+    std::vector<Edge> edges;
+    std::vector<int> count;
+    void addEdge(const Point &a,const Point &b);
 
 private:
     double factorial [maxfactorial] ;  //factorial[x]=x!
@@ -58,6 +71,7 @@ private:
     void createFaces();
     void addCap( int l);
     void addFace(const Point &a,const Point &b,const Point &c);
+    void addFace(std::vector<Face> &faces,const Point &a,const Point &b,const Point &c);
 };
 
 #endif // SPHERICALCALCULATOR_H

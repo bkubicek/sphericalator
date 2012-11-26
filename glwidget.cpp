@@ -23,8 +23,11 @@
      qtGreen = QColor::fromCmykF(0.40, 0.0, 1.0, 0.0);
      qtPurple = QColor::fromCmykF(0.39, 0.39, 0.0, 0.0);
      g=new Geometry();
+     g_overhang=new Geometry();
      glp=new Patch(g);
+     glp_overhang=new Patch(g_overhang);
      qSetColor(glp->faceColor, QColor(128,255,0));
+     qSetColor(glp_overhang->faceColor, QColor(255,0,0));
  }
 
  GLWidget::~GLWidget()
@@ -131,15 +134,25 @@
      //logo->draw();
 
      g->loadArrays();
+     
 
      glEnableClientState(GL_VERTEX_ARRAY);
      glEnableClientState(GL_NORMAL_ARRAY);
-
-
      glp->draw();
-
      glDisableClientState(GL_VERTEX_ARRAY);
      glDisableClientState(GL_NORMAL_ARRAY);
+     g_overhang->loadArrays();
+     glEnableClientState(GL_VERTEX_ARRAY);
+     glEnableClientState(GL_NORMAL_ARRAY);
+     glp_overhang->draw();
+     glDisableClientState(GL_VERTEX_ARRAY);
+     glDisableClientState(GL_NORMAL_ARRAY);
+     
+     glBegin(GL_LINES);
+     glColor3f(1.0f,0.0,0.0);
+     glVertex2f(50,1);
+     glVertex2f(120,1);
+     glEnd();
 
  }
 
