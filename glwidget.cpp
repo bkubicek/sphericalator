@@ -96,7 +96,7 @@
      //glBlendFunc (GL_ONE, GL_ONE);
      //getCamera()->setProjectionMatrixAsPerspective(
        //          45.0f, static_cast<double>(width())/static_cast<double>(height()), -5.,5.);
-     glFrustum(-1,1,1,-1,-5,5);
+     glFrustum(-1.2,1.2,1.2,-1.2,-10,10);
      static GLfloat lightPosition[4] = { 1, 1.0, 1.0, -10.0 };
      const float amb = 0.5;
          const float LightAmbient[][4]  = {  { amb, amb, amb, 1.0f },

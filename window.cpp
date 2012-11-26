@@ -85,9 +85,9 @@ void Window::recalculate()
         maxm=4;
 
     if(!saving)
-        sc->setResolution(maxl*10,maxm*10);
+        sc->setResolution(maxl*20,maxm*35);
     else
-        sc->setResolution(maxl*25,maxm*25);
+        sc->setResolution(maxl*35,maxm*45);
     saving=false;
 
     sc->update();

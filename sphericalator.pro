@@ -12,7 +12,7 @@ TARGET = sphericalator
 #CONFIG   += console
 CONFIG   -= app_bundle
 CONFIG +=  static
-QMAKE_CXXFLAGS+= -fopenmp -O3 -march=pentium4   -ffast-math
+QMAKE_CXXFLAGS+= -fopenmp -O3 -march=native   -ffast-math
 QMAKE_LFLAGS += -openmp
 LIBS += -fopenmp -fomit-frame-pointer
 
