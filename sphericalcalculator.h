@@ -50,6 +50,9 @@ public:
     int numAngles;
     int numLayers;
     float minz;
+    float radius;
+    float supportgap,mygap; //mygap=support gap brokne down to r=1;
+    bool support;
 
     std::vector< std::vector<Point> > pts; //point array
 
@@ -72,6 +75,7 @@ private:
     void addCap( int l);
     void addFace(const Point &a,const Point &b,const Point &c);
     void addFace(std::vector<Face> &faces,const Point &a,const Point &b,const Point &c);
+    void createSupport();
 };
 
 #endif // SPHERICALCALCULATOR_H

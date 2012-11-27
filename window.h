@@ -11,6 +11,7 @@ class Patch;
 class QHboxLayout;
 class QVboxLayout;
 class QSpinBox;
+class QCheckBox;
 class QDoubleSpinBox;
 class QPushButton;
 
@@ -51,10 +52,20 @@ private:
    QSpinBox *sb_n;
    std::vector<OverlayGUI*> ovs;
    QPushButton *pb_export;
+   
+   QCheckBox *support;
+   QDoubleSpinBox *supportgap;
+   QDoubleSpinBox *diameter;
+   
+   QCheckBox *autoResolution;
+   QSpinBox *meshResolv;
+   
    bool saving;
 public slots:
    void recalculate();
    void recalculate(int i);
+   void recalculate(double d);
+   void recalculate(bool b);
     void updateOverlays();
     void exportFile();
 };

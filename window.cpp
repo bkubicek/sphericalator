@@ -10,6 +10,7 @@
 #include <iostream>
 #include <QPushButton>
 #include <QString>
+#include <QCheckBox>
 #include <QtGui>
 
 Window::Window()
@@ -33,6 +34,40 @@ Window::Window()
         connect(ovs[i],SIGNAL(changed()),this,SLOT(updateOverlays()));
         vb->addLayout(ovs[i]);
     }
+    support=new QCheckBox("Support");
+    supportgap=new QDoubleSpinBox();
+    supportgap->setValue(0.1);
+    diameter= new QDoubleSpinBox();
+    QHBoxLayout *suphbox=new QHBoxLayout();
+    suphbox->addWidget(support);
+    suphbox->addWidget(new QLabel(" gap:"));
+    suphbox->addWidget(supportgap);
+    vb->addLayout(suphbox);
+    connect(support,SIGNAL(clicked(bool)),this,SLOT(recalculate(bool)));
+    connect(supportgap,SIGNAL(valueChanged(double)),this,SLOT(recalculate(double)));
+    
+    
+    QHBoxLayout *diahbox=new QHBoxLayout();
+    diahbox->addWidget(new QLabel("Diameter"));
+    diahbox->addWidget(diameter);
+    diameter->setRange(1,200);
+    diameter->setSingleStep(1);
+    diameter->setValue(20);
+    vb->addLayout(diahbox);
+    connect(diameter,SIGNAL(valueChanged(double)),this,SLOT(recalculate(double)));
+    
+    QHBoxLayout *resobox=new QHBoxLayout();
+    autoResolution=new QCheckBox("Auto Grid");
+    autoResolution->setChecked(true);
+    meshResolv=new QSpinBox() ;
+    resobox->addWidget(autoResolution);
+    resobox->addWidget(new QLabel("Gridpoints:"));
+    resobox->addWidget(meshResolv);
+    meshResolv->setRange(5,1000);
+    vb->addLayout(resobox);
+    connect(autoResolution,SIGNAL(clicked(bool)),this,SLOT(recalculate(bool)));
+    connect(meshResolv,SIGNAL(valueChanged(int)),this,SLOT(recalculate(int)));
+    
 
     pb_export=new QPushButton("export");
     vb->addWidget(pb_export);
@@ -63,6 +98,14 @@ void Window::updateOverlays()
     recalculate();
 }
 
+void Window::recalculate(double d)
+{
+    recalculate();
+}
+void Window::recalculate(bool b)
+{
+    recalculate();
+}
 void Window::recalculate(int i)
 {
     recalculate();
@@ -70,7 +113,11 @@ void Window::recalculate(int i)
 
 void Window::recalculate()
 {
-
+  sc->radius=0.5*diameter->value();
+  sc->supportgap=supportgap->value();
+  sc->support=support->isChecked();
+  if(autoResolution->isChecked())
+  {
     int maxl=0;
     for(int i=0;i<ovs.size();i++)
         if(ovs[i]->l->value()>maxl)
@@ -89,7 +136,11 @@ void Window::recalculate()
     else
         sc->setResolution(maxl*35,maxm*45);
     saving=false;
-
+  }
+  else
+  {
+         sc->setResolution(meshResolv->value(),meshResolv->value());
+  }
     sc->update();
 
     glw->glp->clear();

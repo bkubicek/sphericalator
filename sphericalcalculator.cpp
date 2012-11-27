@@ -12,6 +12,10 @@ SphericalCalculator::SphericalCalculator()
 {
     setResolution(130,130);
     overhangstart=0.9;
+    
+    radius=20;
+    supportgap=0.1;
+    support=false;
 
 
      //prepare factorial and nlm
@@ -241,7 +245,9 @@ void SphericalCalculator::addFace(const Point &a,const Point &b,const Point &c)
     f.n[0]=nv.x();
     f.n[1]=nv.y();
     f.n[2]=nv.z();
-    if(f.n[2]<overhangstart)
+    
+    
+    if(f.n[2]<overhangstart )
       faces.push_back(f);
     else
       overhangs.push_back(f);
@@ -305,7 +311,7 @@ void SphericalCalculator::saveFile(std::string  filename)
 {
   cerr<<"exporting bin"<<endl;
   char header[80]="foobar";
-  uint32_t triangles=faces.size()*3;
+  uint32_t triangles=faces.size()+overhangs.size();
 
   fstream out(filename.c_str(),fstream::out|fstream::binary);
   out.write(header,80);
@@ -319,15 +325,15 @@ void SphericalCalculator::saveFile(std::string  filename)
   {
       float data[3*4];
       data[0]=0;data[1]=0;data[2]=0; //n
-      data[3]=all[i].x[0][0];
-      data[4]=all[i].x[0][1];
-      data[5]=all[i].x[0][2];
-      data[6]=all[i].x[1][0];
-      data[7]=all[i].x[1][1];
-      data[8]=all[i].x[1][2];
-      data[9]=all[i].x[2][0];
-      data[10]=all[i].x[2][1];
-      data[11]=all[i].x[2][2];
+      data[3]=radius*all[i].x[0][0];
+      data[4]=radius*all[i].x[0][1];
+      data[5]=radius*all[i].x[0][2];
+      data[6]=radius*all[i].x[1][0];
+      data[7]=radius*all[i].x[1][1];
+      data[8]=radius*all[i].x[1][2];
+      data[9]=radius*all[i].x[2][0];
+      data[10]=radius*all[i].x[2][1];
+      data[11]=radius*all[i].x[2][2];
       out.write((char*)&data[0],sizeof(data));
       uint16_t d=0;
       out.write((char*)&d,sizeof(d));
@@ -394,23 +400,10 @@ void SphericalCalculator::addEdge(const Point &a,const Point &b)
   count.push_back(1);
 }
 
-void SphericalCalculator::update()
+void SphericalCalculator::createSupport()
 {
-    calculate();
-    minz=0;
-    createFaces();
-    if(0)
-    for(int i=0;i<overhangs.size();i++)
-    {
-      faces.push_back(overhangs[i]);
-      faces.back().x[0][2]=minz;
-      faces.back().x[1][2]=minz;
-      faces.back().x[2][2]=minz;
-      
-    }
-    
-    
-    for(int t=0;t<overhangs.size();t++)
+  
+   for(int t=0;t<overhangs.size();t++)
     {
       Face &f=overhangs[t];
       Point a,b,c;
@@ -425,12 +418,20 @@ void SphericalCalculator::update()
       c.x[0]=f.x[2][0];
       c.x[1]=f.x[2][1];
       c.x[2]=f.x[2][2];
+//       float fzmin=a.x[2];
+//       if(fzmin>b.x[2]) fzmin=b.x[2];
+//       if(fzmin>c.x[2]) fzmin=c.x[2];
+//       if(fzmin<minz-mygap)
+// 	continue;
+      
+      
+    
       addEdge(a,b);
       addEdge(b,c);
       addEdge(c,a);
     }
     
-    float low=minz-0.01;
+    float low=minz-mygap;
     cout<<"low: "<<low<<" minz:"<<minz<<endl;
     
     vector<Face> supstruct;
@@ -444,8 +445,8 @@ void SphericalCalculator::update()
       Point l2=edges[i].p[1];
       l1.x[2]=low;
       l2.x[2]=low;
-      h1.x[2]-=0.01;
-      h2.x[2]-=0.01;
+      h1.x[2]-=mygap;
+      h2.x[2]-=mygap;
       
       
      addFace(supstruct,h1,h2,l1);
@@ -466,9 +467,9 @@ void SphericalCalculator::update()
       supstruct.push_back(g);
       
       Face f=overhangs[i];
-      f.x[0][2]-=0.01;
-      f.x[1][2]-=0.01;
-      f.x[2][2]-=0.01;
+      f.x[0][2]-=mygap;
+      f.x[1][2]-=mygap;
+      f.x[2][2]-=mygap;
       float xx[3]={f.x[0][0],f.x[0][1],f.x[0][2]};
       f.x[0][0]=f.x[1][0];
       f.x[0][1]=f.x[1][1];
@@ -480,8 +481,17 @@ void SphericalCalculator::update()
       
       
     }
-     overhangs.insert(overhangs.end(),supstruct.begin(),supstruct.end());
+   overhangs.insert(overhangs.end(),supstruct.begin(),supstruct.end());
+}
 
+void SphericalCalculator::update()
+{
+    mygap=supportgap/radius;
+    calculate();
+    minz=0;
+    createFaces();
+    if(support)
+      createSupport();
     
 }
 
