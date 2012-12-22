@@ -54,7 +54,9 @@ private:
    QPushButton *pb_export;
    
    QCheckBox *support;
+   QCheckBox *flat;
    QDoubleSpinBox *supportgap;
+   QDoubleSpinBox *flatheight;
    QDoubleSpinBox *diameter;
    
    QCheckBox *autoResolution;

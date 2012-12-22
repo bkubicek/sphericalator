@@ -402,7 +402,10 @@ void SphericalCalculator::addEdge(const Point &a,const Point &b)
 
 void SphericalCalculator::createSupport()
 {
-  
+    float low=minz-mygap;
+    if(flatheight!=0)
+        low=minz+flatheight;
+
    for(int t=0;t<overhangs.size();t++)
     {
       Face &f=overhangs[t];
@@ -425,13 +428,16 @@ void SphericalCalculator::createSupport()
 // 	continue;
       
       
-    
+      if(a.x[2]>low && (b.x[2]>low) && (c.x[2]>low))
+      {
       addEdge(a,b);
       addEdge(b,c);
       addEdge(c,a);
+      }
     }
     
-    float low=minz-mygap;
+
+
     cout<<"low: "<<low<<" minz:"<<minz<<endl;
     
     vector<Face> supstruct;
@@ -484,12 +490,33 @@ void SphericalCalculator::createSupport()
    overhangs.insert(overhangs.end(),supstruct.begin(),supstruct.end());
 }
 
+void SphericalCalculator::flatbottom()
+{
+    float cut=minz+flatheight;
+    for(int i=0;i<faces.size();i++)
+    {
+        for(int j=0;j<3;j++)
+        if(faces[i].x[j][2]<cut)
+            faces[i].x[j][2]=cut;
+    }
+
+    for(int i=0;i<overhangs.size();i++)
+    {
+        for(int j=0;j<3;j++)
+        if(overhangs[i].x[j][2]<cut)
+            overhangs[i].x[j][2]=cut;
+    }
+
+}
+
 void SphericalCalculator::update()
 {
     mygap=supportgap/radius;
     calculate();
     minz=0;
     createFaces();
+    if(flatheight!=0)
+        flatbottom();
     if(support)
       createSupport();
     

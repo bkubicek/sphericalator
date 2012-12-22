@@ -43,8 +43,22 @@ Window::Window()
     suphbox->addWidget(new QLabel(" gap:"));
     suphbox->addWidget(supportgap);
     vb->addLayout(suphbox);
+
+    flat=new QCheckBox("Flat");
+    flatheight=new QDoubleSpinBox();
+    flatheight->setValue(0.2);
+    QHBoxLayout *flatbox=new QHBoxLayout();
+    flatbox->addWidget(flat);
+    flatbox->addWidget(new QLabel(" flatcut:"));
+    flatbox->addWidget(flatheight);
+    vb->addLayout(flatbox);
+
+
     connect(support,SIGNAL(clicked(bool)),this,SLOT(recalculate(bool)));
     connect(supportgap,SIGNAL(valueChanged(double)),this,SLOT(recalculate(double)));
+
+    connect(flat,SIGNAL(clicked(bool)),this,SLOT(recalculate(bool)));
+    connect(flatheight,SIGNAL(valueChanged(double)),this,SLOT(recalculate(double)));
     
     
     QHBoxLayout *diahbox=new QHBoxLayout();
@@ -141,6 +155,12 @@ void Window::recalculate()
   {
          sc->setResolution(meshResolv->value(),meshResolv->value());
   }
+
+  if(flat->isChecked())
+      sc->flatheight=flatheight->value();
+  else
+      sc->flatheight=0;
+
     sc->update();
 
     glw->glp->clear();

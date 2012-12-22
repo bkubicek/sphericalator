@@ -43,6 +43,7 @@ public:
     SphericalCalculator();
     void setResolution(int _numLayers, int _numAngles);
     void update();
+    void flatbottom();
     float overhangstart;
 
     void saveFile(std::string filename);
@@ -53,6 +54,7 @@ public:
     float radius;
     float supportgap,mygap; //mygap=support gap brokne down to r=1;
     bool support;
+    float flatheight;
 
     std::vector< std::vector<Point> > pts; //point array
 
